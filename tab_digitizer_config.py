@@ -124,7 +124,7 @@ class tab_digitizer_config(object):
 
         column += 1
         self.exportPath_textbox = QtWidgets.QLineEdit()
-        self.exportPath_textbox.setText("/home/uva/daq_staging/defaults/")
+        self.exportPath_textbox.setText("/hdd/DRS_staging/defaults/highgain.cfg")
         exportLayout.addWidget(self.exportPath_textbox, row, column)
 
         column += 1
@@ -147,7 +147,7 @@ class tab_digitizer_config(object):
 
         column += 1
         self.importPath_textbox = QtWidgets.QLineEdit()
-        self.importPath_textbox.setText("/home/uva/daq_staging/defaults/")
+        self.importPath_textbox.setText("/hdd/DRS_staging/defaults/highgain.cfg")
         exportLayout.addWidget(self.importPath_textbox, row, column)
 
         column += 1
@@ -178,83 +178,94 @@ class tab_digitizer_config(object):
         self.load_config(self.importPath_textbox.displayText())
 
     def load_config(self, path):
-        with open(path, 'r') as infile:
-            section = 0
-            for line in infile:
-                line = line.strip()
-                if line == section_headers[common_section]:
-                    section = common_section
-                elif line == section_headers[group_0_section]:
-                    section = group_0_section
-                elif line == section_headers[group_1_section]:
-                    section = group_1_section
-                elif line == section_headers[trigger_section]:
-                    section = trigger_section
-                else:
-                    items = line.split()
-                    if len(items) < 2:
-                        continue
-                    
-                    key = items[0]
-                    if key in config_list[section]:
-                        value = items[1]
-                        bounds = config_list[section][key][2]
-                        if type(bounds) is dict:
-                            value = int(value)
-                            if section == trigger_section and (key == 'DC_OFFSET' or key == 'THRESHOLD'):
-                                self.device_input_list[trigger_section]['TYPE'].setCurrentText('Custom')
-                                self.trigger_type_changed('Custom')
-                            if (value <= bounds['max']) and (value >= bounds['min']):
-                                self.device_input_list[section][key].setValue(value)
-                        elif type(bounds) is list:
-                            for i in range(len(bounds)):
-                                if bounds[i] == value:
-                                    self.device_input_list[section][key].setCurrentIndex(i)
-                                    if section == trigger_section and key == 'TYPE':
-                                        self.trigger_type_changed(value)
-                                    break
-                    elif key == "GRP_CH_DC_OFFSET" and len(items) == 9:
-                        for c in range(8):
-                            self.device_input_list[section]["CH{}_DC_OFFSET".format(c)].setValue(int(items[1+c]))
-
+        try:
+            with open(path, 'r') as infile:
+                section = 0
+                for line in infile:
+                    line = line.strip()
+                    if line == section_headers[common_section]:
+                        section = common_section
+                    elif line == section_headers[group_0_section]:
+                        section = group_0_section
+                    elif line == section_headers[group_1_section]:
+                        section = group_1_section
+                    elif line == section_headers[trigger_section]:
+                        section = trigger_section
+                    else:
+                        items = line.split()
+                        if len(items) < 2:
+                            continue
+                        
+                        key = items[0]
+                        if key in config_list[section]:
+                            value = items[1]
+                            bounds = config_list[section][key][2]
+                            if type(bounds) is dict:
+                                value = int(value)
+                                if section == trigger_section and (key == 'DC_OFFSET' or key == 'THRESHOLD'):
+                                    self.device_input_list[trigger_section]['TYPE'].setCurrentText('Custom')
+                                    self.trigger_type_changed('Custom')
+                                if (value <= bounds['max']) and (value >= bounds['min']):
+                                    self.device_input_list[section][key].setValue(value)
+                            elif type(bounds) is list:
+                                for i in range(len(bounds)):
+                                    if bounds[i] == value:
+                                        self.device_input_list[section][key].setCurrentIndex(i)
+                                        if section == trigger_section and key == 'TYPE':
+                                            self.trigger_type_changed(value)
+                                        break
+                        elif key == "GRP_CH_DC_OFFSET" and len(items) == 9:
+                            for c in range(8):
+                                self.device_input_list[section]["CH{}_DC_OFFSET".format(c)].setValue(int(items[1+c]))
+            print(f"[INFO] Config file '{path}' successfully parsed and loaded.")
+        except FileNotFoundError:
+            print(f"[ERROR] Config file '{path}' not found.")
+        except Exception as e:
+            print(f"[ERROR] Failed to load config file '{path}': {e}")
 
 
     def export_config(self):
         self.write_config(self.exportPath_textbox.displayText())
 
     def write_config(self, path):
-        with open(path, 'w') as out:
-            out.write(section_headers[common_section] + "\n")
-            for key in common_config_dict:
-                widget = self.device_input_list[0][key]
-                if key == 'DRS4_FREQUENCY':
-                    out.write('{} {}\n'.format(key, widget.currentIndex()))
-                elif type(widget) is QtWidgets.QComboBox:
-                    out.write('{} {}\n'.format(key, widget.currentText()))
-                elif type(widget) is QtWidgets.QSpinBox:
-                    out.write('{} {}\n'.format(key, widget.value()))
-            
-            for g in range(2):
-                header = section_headers[1+g]
-                out.write(header + "\n")
-
-                for key in group_config_dict:
-                    widget = self.device_input_list[1+g][key]
-                    if type(widget) is QtWidgets.QComboBox:
+        try:
+            with open(path, 'w') as out:
+                out.write(section_headers[common_section] + "\n")
+                for key in common_config_dict:
+                    widget = self.device_input_list[0][key]
+                    if key == 'DRS4_FREQUENCY':
+                        out.write('{} {}\n'.format(key, widget.currentIndex()))
+                    elif type(widget) is QtWidgets.QComboBox:
                         out.write('{} {}\n'.format(key, widget.currentText()))
                     elif type(widget) is QtWidgets.QSpinBox:
                         out.write('{} {}\n'.format(key, widget.value()))
-                       
-            out.write(section_headers[trigger_section] + "\n")
-            if self.device_input_list[trigger_section]["TYPE"].currentText() == "Custom":
-                dc_offset = "DC_OFFSET"
-                out.write('{} {}\n'.format(dc_offset, self.device_input_list[trigger_section][dc_offset].value()))
+                
+                for g in range(2):
+                    header = section_headers[1+g]
+                    out.write(header + "\n")
 
-                threshold = "THRESHOLD"
-                out.write('{} {}\n'.format(threshold, self.device_input_list[trigger_section][threshold].value()))
-            else:
-                ttype = "TYPE"
-                out.write('{} {}\n'.format(ttype, self.device_input_list[trigger_section][ttype].currentText()))
+                    for key in group_config_dict:
+                        widget = self.device_input_list[1+g][key]
+                        if type(widget) is QtWidgets.QComboBox:
+                            out.write('{} {}\n'.format(key, widget.currentText()))
+                        elif type(widget) is QtWidgets.QSpinBox:
+                            out.write('{} {}\n'.format(key, widget.value()))
+                           
+                out.write(section_headers[trigger_section] + "\n")
+                if self.device_input_list[trigger_section]["TYPE"].currentText() == "Custom":
+                    dc_offset = "DC_OFFSET"
+                    out.write('{} {}\n'.format(dc_offset, self.device_input_list[trigger_section][dc_offset].value()))
+
+                    threshold = "THRESHOLD"
+                    out.write('{} {}\n'.format(threshold, self.device_input_list[trigger_section][threshold].value()))
+                else:
+                    ttype = "TYPE"
+                    out.write('{} {}\n'.format(ttype, self.device_input_list[trigger_section][ttype].currentText()))
+                print(f"[INFO] Config file '{path}' successfully written to default folder.")
+        except FileNotFoundError:
+            print(f"[ERROR] Config file '{path}' not created.")
+        except Exception as e:
+            print(f"[ERROR] Failed to create config file '{path}': {e}")
 
 
     def trigger_type_changed(self, text):

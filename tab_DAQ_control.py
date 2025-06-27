@@ -11,10 +11,10 @@ import numpy as np
 from MonitorPlots import *
 
 
-N_Sipm_Channels = 4
+N_Sipm_Channels = 16
 MCP_Channel = 8
-Scint_Channel = 9
-N_Channels = 10
+Scint_Channel = 16
+N_Channels = 17
 
 class tab_DAQ_control(QtCore.QObject):
 
@@ -51,27 +51,27 @@ class tab_DAQ_control(QtCore.QObject):
 
         row = 0
         column = 0
-        label = QtWidgets.QLabel()
-        label.setText("View Channel")
-        enableLayout.addWidget(label, row, column, 1, 1)
+        # label = QtWidgets.QLabel()
+        # label.setText("View Channel")
+        # enableLayout.addWidget(label, row, column, 1, 1)
  
-        column += 1
+        # column += 1
         for i in range(N_Sipm_Channels):
             label = QtWidgets.QLabel()
-            label.setText("Front {}".format(i))
+            label.setText("{}".format(i))
             enableLayout.addWidget(label, row, column + i, 1, 1, QtCore.Qt.AlignHCenter)
         
-        for i in range(N_Sipm_Channels):
-            label = QtWidgets.QLabel()
-            label.setText("Rear {}".format(i))
-            enableLayout.addWidget(label, row, column + N_Sipm_Channels + i, 1, 1, QtCore.Qt.AlignHCenter)
+        # for i in range(N_Sipm_Channels):
+        #     label = QtWidgets.QLabel()
+        #     label.setText("Rear {}".format(i))
+        #     enableLayout.addWidget(label, row, column + N_Sipm_Channels + i, 1, 1, QtCore.Qt.AlignHCenter)
+
+        # label = QtWidgets.QLabel()
+        # label.setText("MCP")
+        # enableLayout.addWidget(label, row, column + MCP_Channel, 1, 1, QtCore.Qt.AlignHCenter)
 
         label = QtWidgets.QLabel()
-        label.setText("MCP")
-        enableLayout.addWidget(label, row, column + MCP_Channel, 1, 1, QtCore.Qt.AlignHCenter)
-
-        label = QtWidgets.QLabel()
-        label.setText("Scintillation Trigger")
+        label.setText("Trigger")
         enableLayout.addWidget(label, row, column + Scint_Channel, 1, 1, QtCore.Qt.AlignHCenter)
 
 
@@ -79,11 +79,11 @@ class tab_DAQ_control(QtCore.QObject):
 
         row += 1
         column = 0
-        label = QtWidgets.QLabel()
-        label.setText("High Gain")
-        enableLayout.addWidget(label, row, column, 1, 1)
+        # label = QtWidgets.QLabel()
+        # label.setText("High Gain")
+        # enableLayout.addWidget(label, row, column, 1, 1)
 
-        column += 1
+        # column += 1
         for i in range(N_Channels):
             checkbox = QtWidgets.QCheckBox()
             checkbox.setChecked(True)
@@ -92,39 +92,39 @@ class tab_DAQ_control(QtCore.QObject):
             self.channel_enable_checkboxes.append(checkbox)
 
 
-        row += 1
-        column = 0
-        label = QtWidgets.QLabel()
-        label.setText("Low Gain")
-        enableLayout.addWidget(label, row, column, 1, 1)
+        # row += 1
+        # column = 0
+        # label = QtWidgets.QLabel()
+        # label.setText("Low Gain")
+        # enableLayout.addWidget(label, row, column, 1, 1)
 
-        column += 1
-        for i in range(N_Channels):
-            checkbox = QtWidgets.QCheckBox()
-            checkbox.setChecked(True)
-            checkbox.clicked.connect(lambda c, i=N_Channels+i: self.channel_enable_changed(c,i))
-            enableLayout.addWidget(checkbox, row, column + i, 1, 1, QtCore.Qt.AlignHCenter)
-            self.channel_enable_checkboxes.append(checkbox)
+        # column += 1
+        # for i in range(N_Channels):
+        #     checkbox = QtWidgets.QCheckBox()
+        #     checkbox.setChecked(True)
+        #     checkbox.clicked.connect(lambda c, i=N_Channels+i: self.channel_enable_changed(c,i))
+        #     enableLayout.addWidget(checkbox, row, column + i, 1, 1, QtCore.Qt.AlignHCenter)
+        #     self.channel_enable_checkboxes.append(checkbox)
         
 
         self.monitor_plots = MonitorPlots(self.status)
         self.monitor_plots.make_waveform_plot('HG Waveform', 'HG{}', N_Channels)
         legend = pg.LegendItem(horSpacing = 0, frame = False, colCount = 1)
         for i in range(N_Sipm_Channels):
-            legend.addItem(self.monitor_plots.lines[i], 'FH{}'.format(i))
-            legend.addItem(self.monitor_plots.lines[i + N_Sipm_Channels], 'BH{}'.format(i))
-        legend.addItem(self.monitor_plots.lines[MCP_Channel], 'MCP HG')
-        legend.addItem(self.monitor_plots.lines[Scint_Channel], 'Scint. HG')
+            legend.addItem(self.monitor_plots.lines[i], 'Chnl{}'.format(i))
+            # legend.addItem(self.monitor_plots.lines[i + N_Sipm_Channels], 'BH{}'.format(i))
+        # legend.addItem(self.monitor_plots.lines[MCP_Channel], 'MCP HG')
+        legend.addItem(self.monitor_plots.lines[Scint_Channel], 'Trigger')
         self.monitor_plots.layoutWidget.addItem(legend)
 
-        self.monitor_plots.make_waveform_plot('LG Waveform', 'LG{}', N_Channels)
-        legend = pg.LegendItem(horSpacing = 0, frame = False, colCount = 1)
-        for i in range(N_Sipm_Channels):
-            legend.addItem(self.monitor_plots.lines[i+N_Channels], 'FL{}'.format(i))
-            legend.addItem(self.monitor_plots.lines[i+N_Channels + N_Sipm_Channels], 'BL{}'.format(i))
-        legend.addItem(self.monitor_plots.lines[N_Channels + MCP_Channel], 'MCP LG')
-        legend.addItem(self.monitor_plots.lines[N_Channels + Scint_Channel], 'Scint. LG')
-        self.monitor_plots.layoutWidget.addItem(legend)
+        # self.monitor_plots.make_waveform_plot('LG Waveform', 'LG{}', N_Channels)
+        # legend = pg.LegendItem(horSpacing = 0, frame = False, colCount = 1)
+        # for i in range(N_Sipm_Channels):
+        #     legend.addItem(self.monitor_plots.lines[i+N_Channels], 'FL{}'.format(i))
+        #     legend.addItem(self.monitor_plots.lines[i+N_Channels + N_Sipm_Channels], 'BL{}'.format(i))
+        # legend.addItem(self.monitor_plots.lines[N_Channels + MCP_Channel], 'MCP LG')
+        # legend.addItem(self.monitor_plots.lines[N_Channels + Scint_Channel], 'Scint. LG')
+        # self.monitor_plots.layoutWidget.addItem(legend)
 
         self.monitor_plots.request_monitor_data.connect(self.single_plot)
         self.sectionLayout.addWidget(self.monitor_plots.get_layout_widget())
@@ -165,11 +165,13 @@ class tab_DAQ_control(QtCore.QObject):
         self.monitor_plots.lines[i].setVisible(c)
 
     def update_plot(self, waveform_data):  
-        hg_times, hg_channels, lg_times, lg_channels = waveform_data
+        hg_times, hg_channels = waveform_data
+        # hg_times, hg_channels, lg_times, lg_channels = waveform_data
         if hg_times != None and hg_channels != None:
-            for i in range(N_Channels):
+            for i in range(len(hg_channels)):
+                # print(f"updating for channel{i}")
                 self.monitor_plots.set_data(i, hg_times, hg_channels[i])
         
-        if lg_times != None and lg_channels != None:
-            for i in range(N_Channels):
-                self.monitor_plots.set_data(N_Channels + i, lg_times, lg_channels[i])
+        # if lg_times != None and lg_channels != None:
+        #     for i in range(N_Channels):
+        #         self.monitor_plots.set_data(N_Channels + i, lg_times, lg_channels[i])

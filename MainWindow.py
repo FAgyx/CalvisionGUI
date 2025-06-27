@@ -7,7 +7,7 @@ from tab_digitizer_config import tab_digitizer_config
 from tab_run_control import tab_run_control
 from tab_previous_runs import tab_previous_runs
 from tab_rotor_control import tab_rotor_control
-from tab_pulser import tab_pulser
+# from tab_pulser import tab_pulser
 
 from RunConfig import *
 from DeviceList import *
@@ -34,8 +34,8 @@ class RunStatus:
         self.is_running = False
 
 
-default_hg_config = "/home/uva/daq_staging/defaults/2024-04-24_HG_settings.cfg"
-default_lg_config = "/home/uva/daq_staging/defaults/2024-04-24_LG_settings.cfg"
+default_hg_config = "/hdd/DRS_staging/defaults/highgain.cfg"
+default_lg_config = "/hdd/DRS_staging/defaults/lowgain.cfg"
 
 class Ui_MainWindow():
     
@@ -85,67 +85,68 @@ class Ui_MainWindow():
         self.tabWidget.addTab(previous_runs_tab, "Previous Runs")
         self.tab_previous_runs_inst = tab_previous_runs(previous_runs_tab)
 
-        rotor_control_tab = QtWidgets.QWidget()
-        self.tabWidget.addTab(rotor_control_tab, "Rotor Control")
-        self.tab_rotor_control_inst = tab_rotor_control(self.run_config, self.status, self.device_list, rotor_control_tab)
+        # rotor_control_tab = QtWidgets.QWidget()
+        # self.tabWidget.addTab(rotor_control_tab, "Rotor Control")
+        # self.tab_rotor_control_inst = tab_rotor_control(self.run_config, self.status, self.device_list, rotor_control_tab)
 
         digi_config_tab = QtWidgets.QTabWidget()
         self.tabWidget.addTab(digi_config_tab, "Digitizer Configuration")
         self.tab_digi_config_insts = []
-        for i, name in enumerate(["High Gain", "Low Gain"]):
+        # for i, name in enumerate(["High Gain", "Low Gain"]):
+        for i, name in enumerate(["High Gain"]):
             digi_device_config_tab = QtWidgets.QWidget()
             self.tab_digi_config_insts.append(tab_digitizer_config(self.run_config, digi_device_config_tab))
             digi_config_tab.addTab(digi_device_config_tab, name)
 
-        sipm_hv_config_tab = QtWidgets.QWidget()
-        self.tabWidget.addTab(sipm_hv_config_tab, "SiPM HV Control")
-        self.tab_sipm_hv_config_inst = tab_SiPM_HV_config(self.run_config, self.status, sipm_hv_config_tab, self.device_list)
+        # sipm_hv_config_tab = QtWidgets.QWidget()
+        # self.tabWidget.addTab(sipm_hv_config_tab, "SiPM HV Control")
+        # self.tab_sipm_hv_config_inst = tab_SiPM_HV_config(self.run_config, self.status, sipm_hv_config_tab, self.device_list)
 
-        pi_control_tab = QtWidgets.QWidget()
-        self.tabWidget.addTab(pi_control_tab, "PI Control")
-        self.tab_pi_control_inst = tab_PIcontrol(self.run_config, self.status, pi_control_tab)
+        # pi_control_tab = QtWidgets.QWidget()
+        # self.tabWidget.addTab(pi_control_tab, "PI Control")
+        # self.tab_pi_control_inst = tab_PIcontrol(self.run_config, self.status, pi_control_tab)
 
         daq_control_tab = QtWidgets.QWidget()
         self.tabWidget.addTab(daq_control_tab, "DAQ Control")
         self.tab_daq_control_inst = tab_DAQ_control(self.run_config, self.status, daq_control_tab)
 
-        calibrate_tab = QtWidgets.QWidget()
-        self.tabWidget.addTab(calibrate_tab, "Calibrate")
-        self.tab_calibrate_inst = tab_calibrate(calibrate_tab)
+        # calibrate_tab = QtWidgets.QWidget()
+        # self.tabWidget.addTab(calibrate_tab, "Calibrate")
+        # self.tab_calibrate_inst = tab_calibrate(calibrate_tab)
 
-        pulser_tab = QtWidgets.QWidget()
-        self.tabWidget.addTab(pulser_tab, "Pulser")
-        self.tab_pulser_inst = tab_pulser(self.run_config, self.status, pulser_tab)
+        # pulser_tab = QtWidgets.QWidget()
+        # self.tabWidget.addTab(pulser_tab, "Pulser")
+        # self.tab_pulser_inst = tab_pulser(self.run_config, self.status, pulser_tab)
 
         
         # Connect signals - slots
-        self.tab_run_control_inst.run_config_changed.connect(self.check_repeat)
+        # self.tab_run_control_inst.run_config_changed.connect(self.check_repeat)
         self.tab_run_control_inst.begin_run.connect(self.begin_run)
         self.tab_run_control_inst.end_run.connect(self.end_run)
         
         self.status.update_timer.timeout.connect(self.update_status)
-        self.status.update_timer.timeout.connect(self.tab_pi_control_inst.monitor_plots.monitor_callback)
-        self.status.update_timer.timeout.connect(self.tab_sipm_hv_config_inst.monitor_plots.monitor_callback)
+        # self.status.update_timer.timeout.connect(self.tab_pi_control_inst.monitor_plots.monitor_callback)
+        # self.status.update_timer.timeout.connect(self.tab_sipm_hv_config_inst.monitor_plots.monitor_callback)
         self.status.update_timer.timeout.connect(self.tab_daq_control_inst.monitor_plots.monitor_callback)
 
         self.tab_daq_control_inst.daq_readout_stopped.connect(self.tab_run_control_inst.end_run)
 
-        self.tab_pi_control_inst.low_voltage_set.connect(self.set_last_led_voltage)
-        self.tab_pi_control_inst.high_voltage_set.connect(self.set_last_bjt_bias)
+        # self.tab_pi_control_inst.low_voltage_set.connect(self.set_last_led_voltage)
+        # self.tab_pi_control_inst.high_voltage_set.connect(self.set_last_bjt_bias)
 
-        self.tab_run_control_inst.inhibit_daq.connect(self.tab_pulser_inst.holdoff_pulser.enable_controls)
-        self.tab_run_control_inst.led_enable.connect(self.tab_pulser_inst.led_pulser.enable_controls)
+        # self.tab_run_control_inst.inhibit_daq.connect(self.tab_pulser_inst.holdoff_pulser.enable_controls)
+        # self.tab_run_control_inst.led_enable.connect(self.tab_pulser_inst.led_pulser.enable_controls)
 
-        self.tab_pulser_inst.led_pulser.control_change.connect(self.tab_run_control_inst.enable_led_controls)
-        self.tab_pulser_inst.holdoff_pulser.control_change.connect(self.tab_run_control_inst.enable_holdoff_controls)
+        # self.tab_pulser_inst.led_pulser.control_change.connect(self.tab_run_control_inst.enable_led_controls)
+        # self.tab_pulser_inst.holdoff_pulser.control_change.connect(self.tab_run_control_inst.enable_holdoff_controls)
         
-        self.tab_rotor_control_inst.angle_changed.connect(self.tab_run_control_inst.update_angle)
+        # self.tab_rotor_control_inst.angle_changed.connect(self.tab_run_control_inst.update_angle)
 
         # Make sure state is up to date
-        self.tab_pulser_inst.setup()
-        self.check_repeat()
+        # self.tab_pulser_inst.setup()
+        # self.check_repeat()
         self.update_status()
-        self.tab_run_control_inst.update_angle(self.tab_rotor_control_inst.angle)
+        # self.tab_run_control_inst.update_angle(self.tab_rotor_control_inst.angle)
 
 
         print("Attempting to load HG digitizer config from {}".format(default_hg_config))
@@ -155,12 +156,12 @@ class Ui_MainWindow():
         except Exception as e:
             print("Failed to load HG config: {}".format(e))
 
-        print("Attempting to load LG digitizer config from {}".format(default_lg_config))
-        try:
-            self.tab_digi_config_insts[1].load_config(default_lg_config)
-            print("Successfully loaded LG config")
-        except Exception as e:
-            print("Failed to load LG config: {}".format(e))
+        # print("Attempting to load LG digitizer config from {}".format(default_lg_config))
+        # try:
+        #     self.tab_digi_config_insts[1].load_config(default_lg_config)
+        #     print("Successfully loaded LG config")
+        # except Exception as e:
+        #     print("Failed to load LG config: {}".format(e))
 
 
     def set_last_led_voltage(self, v):
@@ -174,8 +175,8 @@ class Ui_MainWindow():
 
 
     def check_repeat(self):
-        self.run_config.front_sipm_voltage = self.tab_sipm_hv_config_inst.front_voltage_run()
-        self.run_config.back_sipm_voltage = self.tab_sipm_hv_config_inst.rear_voltage_run()
+        # self.run_config.front_sipm_voltage = self.tab_sipm_hv_config_inst.front_voltage_run()
+        # self.run_config.back_sipm_voltage = self.tab_sipm_hv_config_inst.rear_voltage_run()
         self.tab_previous_runs_inst.update_run_table()
         exists = self.tab_previous_runs_inst.config_exists(self.run_config.to_dict())
         self.tab_run_control_inst.update_repeat_warning(exists)
@@ -184,12 +185,12 @@ class Ui_MainWindow():
         self.run_config.make_next_run()
         print("Starting next run: {}".format(self.run_config.run_number))
         self.tab_digi_config_insts[0].write_config(self.run_config.hg_config_file())
-        self.tab_digi_config_insts[1].write_config(self.run_config.lg_config_file())
+        # self.tab_digi_config_insts[1].write_config(self.run_config.lg_config_file())
         self.status.begin_run()
         self.tab_run_control_inst.update_status_all()
         self.tab_daq_control_inst.monitor_plots.run_start()
-        self.tab_pi_control_inst.monitor_plots.run_start()
-        self.tab_sipm_hv_config_inst.monitor_plots.run_start()
+        # self.tab_pi_control_inst.monitor_plots.run_start()
+        # self.tab_sipm_hv_config_inst.monitor_plots.run_start()
         self.save_status(self.run_config.run_directory() + "/run_start_status.json")
         self.tab_daq_control_inst.start_DAQ()
 
@@ -198,10 +199,10 @@ class Ui_MainWindow():
             self.tab_daq_control_inst.stop_DAQ()
             self.status.end_run()
             self.tab_daq_control_inst.monitor_plots.run_stop()
-            self.tab_pi_control_inst.monitor_plots.run_stop()
-            self.tab_sipm_hv_config_inst.monitor_plots.run_stop()
+            # self.tab_pi_control_inst.monitor_plots.run_stop()
+            # self.tab_sipm_hv_config_inst.monitor_plots.run_stop()
             self.save_status(self.run_config.run_directory() + "/run_end_status.json")
-            self.check_repeat()
+            # self.check_repeat()
 
     def update_status(self):
         monitor_value_if_exists = lambda tab, i: tab.monitor_plots.y_values[i][-1] if len(tab.monitor_plots.y_values[i]) > 0 else "-"
@@ -215,47 +216,47 @@ class Ui_MainWindow():
         else:
             self.tab_run_control_inst.status_values['Run Status'] = 'Not running'
 
-        if self.tab_sipm_hv_config_inst.hv.ser != None:
-            self.tab_run_control_inst.status_values['Front SiPM HV Voltage'] = '{} V'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 0))
-            self.tab_run_control_inst.status_values['Front SiPM HV Current'] = '{} mA'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 1))
-        else:
-            self.tab_run_control_inst.status_values['Front SiPM HV Voltage'] = "Device not enabled"
-            self.tab_run_control_inst.status_values['Front SiPM HV Current'] = "Device not enabled"
+        # if self.tab_sipm_hv_config_inst.hv.ser != None:
+        #     self.tab_run_control_inst.status_values['Front SiPM HV Voltage'] = '{} V'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 0))
+        #     self.tab_run_control_inst.status_values['Front SiPM HV Current'] = '{} mA'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 1))
+        # else:
+        #     self.tab_run_control_inst.status_values['Front SiPM HV Voltage'] = "Device not enabled"
+        #     self.tab_run_control_inst.status_values['Front SiPM HV Current'] = "Device not enabled"
 
-        if self.tab_sipm_hv_config_inst.hv2.ser != None:
-            self.tab_run_control_inst.status_values['Back SiPM HV Voltage'] = '{} V'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 2))
-            self.tab_run_control_inst.status_values['Back SiPM HV Current'] = '{} mA'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 3))
-        else:
-            self.tab_run_control_inst.status_values['Back SiPM HV Voltage'] = "Device not enabled"
-            self.tab_run_control_inst.status_values['Back SiPM HV Current'] = "Device not enabled"
+        # if self.tab_sipm_hv_config_inst.hv2.ser != None:
+        #     self.tab_run_control_inst.status_values['Back SiPM HV Voltage'] = '{} V'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 2))
+        #     self.tab_run_control_inst.status_values['Back SiPM HV Current'] = '{} mA'.format(monitor_value_if_exists(self.tab_sipm_hv_config_inst, 3))
+        # else:
+        #     self.tab_run_control_inst.status_values['Back SiPM HV Voltage'] = "Device not enabled"
+        #     self.tab_run_control_inst.status_values['Back SiPM HV Current'] = "Device not enabled"
 
-        self.tab_run_control_inst.status_values['Front SiPM Temperature'] = '{} C'.format(monitor_value_if_exists(self.tab_pi_control_inst, 0))
-        self.tab_run_control_inst.status_values[ 'Back SiPM Temperature'] = '{} C'.format(monitor_value_if_exists(self.tab_pi_control_inst, 1))
-        self.tab_run_control_inst.status_values[       'Box Temperature'] = '{} C'.format(monitor_value_if_exists(self.tab_pi_control_inst, 2))
-        self.tab_run_control_inst.status_values[ 'Box Relative Humidity'] = '{} %'.format(monitor_value_if_exists(self.tab_pi_control_inst, 3))
+        # self.tab_run_control_inst.status_values['Front SiPM Temperature'] = '{} C'.format(monitor_value_if_exists(self.tab_pi_control_inst, 0))
+        # self.tab_run_control_inst.status_values[ 'Back SiPM Temperature'] = '{} C'.format(monitor_value_if_exists(self.tab_pi_control_inst, 1))
+        # self.tab_run_control_inst.status_values[       'Box Temperature'] = '{} C'.format(monitor_value_if_exists(self.tab_pi_control_inst, 2))
+        # self.tab_run_control_inst.status_values[ 'Box Relative Humidity'] = '{} %'.format(monitor_value_if_exists(self.tab_pi_control_inst, 3))
 
-        if self.last_led_voltage == None:
-            self.tab_run_control_inst.status_values['LED Voltage'] = 'No last set of LED voltage'
-        else:
-            self.tab_run_control_inst.status_values['LED Voltage'] = str(self.last_led_voltage)
+        # if self.last_led_voltage == None:
+        #     self.tab_run_control_inst.status_values['LED Voltage'] = 'No last set of LED voltage'
+        # else:
+        #     self.tab_run_control_inst.status_values['LED Voltage'] = str(self.last_led_voltage)
 
-        if self.tab_pi_control_inst.checkBox_LED_HV_enable.isChecked():
-            if self.last_bjt_bias == None:
-                self.tab_run_control_inst.status_values['BJT Bias'] = 'No last set of BJT bias'
-            else:
-                self.tab_run_control_inst.status_values['BJT Bias'] = str(self.last_bjt_bias)
-        else:
-            self.tab_run_control_inst.status_values['BJT Bias'] = 'Disabled'
+        # if self.tab_pi_control_inst.checkBox_LED_HV_enable.isChecked():
+        #     if self.last_bjt_bias == None:
+        #         self.tab_run_control_inst.status_values['BJT Bias'] = 'No last set of BJT bias'
+        #     else:
+        #         self.tab_run_control_inst.status_values['BJT Bias'] = str(self.last_bjt_bias)
+        # else:
+        #     self.tab_run_control_inst.status_values['BJT Bias'] = 'Disabled'
 
-        if self.tab_pulser_inst.pulser.is_open():
-            self.tab_run_control_inst.status_values['LED Pulser Enabled'] = self.tab_pulser_inst.led_pulser.status_enabled.text()
-        else:
-            self.tab_run_control_inst.status_values['LED Pulser Enabled'] = 'No pulser device'
+        # if self.tab_pulser_inst.pulser.is_open():
+        #     self.tab_run_control_inst.status_values['LED Pulser Enabled'] = self.tab_pulser_inst.led_pulser.status_enabled.text()
+        # else:
+        #     self.tab_run_control_inst.status_values['LED Pulser Enabled'] = 'No pulser device'
 
-        if self.tab_pulser_inst.pulser.is_open():
-            self.tab_run_control_inst.status_values['Holdoff Pulser Enabled'] = self.tab_pulser_inst.holdoff_pulser.status_enabled.text()
-        else:
-            self.tab_run_control_inst.status_values['Holdoff Pulser Enabled'] = 'No pulser device'
+        # if self.tab_pulser_inst.pulser.is_open():
+        #     self.tab_run_control_inst.status_values['Holdoff Pulser Enabled'] = self.tab_pulser_inst.holdoff_pulser.status_enabled.text()
+        # else:
+        #     self.tab_run_control_inst.status_values['Holdoff Pulser Enabled'] = 'No pulser device'
         
         self.tab_run_control_inst.update_status_all()
 

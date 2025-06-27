@@ -15,8 +15,8 @@ class tab_previous_runs:
         sectionLayout.addWidget(existingLabel)
 
         self.config_table = QtWidgets.QTableWidget()
-        self.config_table.setColumnCount(9)
-        self.config_table.setHorizontalHeaderLabels(["Run Number", "Crystal", "Front SiPM", "Front Filter", "Front SiPM Voltage", "Back SiPM", "Back Filter", "Back SiPM Voltage", "Angle"])
+        self.config_table.setColumnCount(7)
+        self.config_table.setHorizontalHeaderLabels(["Run Number", "Gas", "Pressure", "High Voltage", "Temperature", "Humidity", "Datetime"])
         sectionLayout.addWidget(self.config_table)
 
         self.update_run_table()
@@ -25,7 +25,6 @@ class tab_previous_runs:
     def update_run_table(self):
         self.existing_runs = RunConfig.find_all()
 
-        
         self.config_table.setRowCount(0)
         for run in self.existing_runs:
             row_index = self.config_table.rowCount()
@@ -39,6 +38,8 @@ class tab_previous_runs:
                 item = QtWidgets.QTableWidgetItem()
                 item.setText(str(x))
                 self.config_table.setItem(row_index, i + 1, item)
+        # Resize columns after all data is in
+        self.config_table.resizeColumnsToContents()
 
 
     def config_exists(self, config_dict):

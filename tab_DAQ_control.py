@@ -44,6 +44,12 @@ class tab_DAQ_control(QtCore.QObject):
         self.pushButton_single_plot.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
         channelLayout.addWidget(self.pushButton_single_plot)
 
+        self.pushButton_check_all = QtWidgets.QPushButton()
+        self.pushButton_check_all.setText("Check all")
+        self.pushButton_check_all.clicked.connect(self.check_all)
+        self.pushButton_check_all.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        channelLayout.addWidget(self.pushButton_check_all)
+
 
         channelEnableWindow = QtWidgets.QWidget()
         enableLayout = QtWidgets.QGridLayout(channelEnableWindow)
@@ -160,6 +166,17 @@ class tab_DAQ_control(QtCore.QObject):
 
     def single_plot(self):
         self.update_plot(self.worker_startDAQ.single_plot())
+
+    def check_all(self):
+        all_checked = True
+        for checkbox in self.channel_enable_checkboxes:
+            if not checkbox.isChecked():
+                all_checked = False
+        for checkbox in self.channel_enable_checkboxes:
+            if all_checked:
+                checkbox.setChecked(False)
+            else:
+                checkbox.setChecked(True)
 
     def channel_enable_changed(self, c, i):
         self.monitor_plots.lines[i].setVisible(c)

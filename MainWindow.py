@@ -33,9 +33,8 @@ class RunStatus:
     def end_run(self):
         self.is_running = False
 
-
-default_hg_config = "/hdd/DRS_staging/defaults/highgain.cfg"
-default_lg_config = "/hdd/DRS_staging/defaults/lowgain.cfg"
+default_hg_config = staging_area+"/defaults/highgain.cfg"
+# default_lg_config = "/hdd/DRS_staging/defaults/lowgain.cfg"
 
 class Ui_MainWindow():
     

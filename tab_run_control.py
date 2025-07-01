@@ -17,15 +17,7 @@ import datetime
 #         return InhibitProcess().run("python3 /home/uva/local_install/python/Inhibit_{}.py".format(postfix))
 
 
-class CalibrateProcess(CallProcess):
-    def __init__(self):
-        pass
 
-    def handle_output(self, line):
-        print(line)
-
-    def execute():
-        CalibrateProcess().run("/home/muonuser/local_install/bin/calibrate")
 
 
 class tab_run_control(QtCore.QObject):
@@ -135,15 +127,6 @@ class tab_run_control(QtCore.QObject):
         format_button(self.endRunButton)
         runButtonLayout.addWidget(self.endRunButton, row, column)
 
-        row += 1
-        column = 0
-        self.calibrateDRSButton = QtWidgets.QPushButton()
-        self.calibrateDRSButton.setText("Get DRS Calib Table")
-        self.calibrateDRSButton.clicked.connect(self.calibrate_DRS)
-        self.calibrateDRSButton.setEnabled(True)
-        format_button(self.calibrateDRSButton)
-        runButtonLayout.addWidget(self.calibrateDRSButton, row, column)
-
         # row += 1
         # column = 0
         # self.inhibit_off_button = QtWidgets.QPushButton()
@@ -190,8 +173,6 @@ class tab_run_control(QtCore.QObject):
         self.enable_holdoff_controls(False, False)
         # self.enable_led_controls(False, False)
 
-    def calibrate_DRS(self):
-        CalibrateProcess.execute()
 
     def begin_run_button(self):
         self.beginRunButton.setEnabled(False)

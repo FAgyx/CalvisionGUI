@@ -1,4 +1,6 @@
 from PyQt5 import QtCore, QtGui, QtWidgets
+from CallProcess import *
+from RunConfig import *
 
 common_config_dict = {
     "POST_TRIGGER": ("Post Trigger", 50, {"min": 0, "max": 100}),
@@ -49,6 +51,15 @@ config_list = [
     trigger_config_dict
 ]
 
+class CalibrateProcess(CallProcess):
+    def __init__(self,path):
+        self.path = path
+
+    def handle_output(self, line):
+        print(line)
+
+    def execute():
+        CalibrateProcess().run("/home/muonuser/local_install/bin/calibrate")
 
 
 class tab_digitizer_config(object):
@@ -124,7 +135,7 @@ class tab_digitizer_config(object):
 
         column += 1
         self.exportPath_textbox = QtWidgets.QLineEdit()
-        self.exportPath_textbox.setText("/hdd/DRS_staging/defaults/highgain.cfg")
+        self.exportPath_textbox.setText(staging_area+"/defaults/highgain.cfg")
         exportLayout.addWidget(self.exportPath_textbox, row, column)
 
         column += 1
@@ -147,7 +158,7 @@ class tab_digitizer_config(object):
 
         column += 1
         self.importPath_textbox = QtWidgets.QLineEdit()
-        self.importPath_textbox.setText("/hdd/DRS_staging/defaults/highgain.cfg")
+        self.importPath_textbox.setText(staging_area+"/defaults/highgain.cfg")
         exportLayout.addWidget(self.importPath_textbox, row, column)
 
         column += 1
@@ -162,6 +173,14 @@ class tab_digitizer_config(object):
         importButton.clicked.connect(self.import_config)
         exportLayout.addWidget(importButton, row, column)
 
+        row += 1
+        column = 0
+        self.calibrateDRSButton = QtWidgets.QPushButton()
+        self.calibrateDRSButton.setText("Fetch DRS Calib Table")
+        self.calibrateDRSButton.clicked.connect(self.calibrate_DRS)
+        self.calibrateDRSButton.setEnabled(True)
+        exportLayout.addWidget(self.calibrateDRSButton, row, column)
+
 
     def open_file(self, path_textbox, mode):
         dialog = QtWidgets.QFileDialog(path_textbox)
@@ -174,8 +193,14 @@ class tab_digitizer_config(object):
             if len(fileNames) > 0:
                 path_textbox.setText(fileNames[0])
 
+
+    def calibrate_DRS(self):
+        CalibrateProcess.execute()
+
+
     def import_config(self):
         self.load_config(self.importPath_textbox.displayText())
+
 
     def load_config(self, path):
         try:

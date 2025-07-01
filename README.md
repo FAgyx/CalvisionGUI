@@ -30,7 +30,9 @@ Unplug and plug back the CAEN digitizer USB, and verify:
 ls -l /dev/v1718*  # or whatever node your device uses
 ```
 
-
+## Change DAQ start location
+Modify CalvisionGUI/Worker_startDAQ.py, line 18:
+CallProcess.run(self, "/home/muonuser/local_install/bin/dual_readout {} {} {}".format(run_name, hg_config, lg_config))
 
 ## Change data storage location
 Modify 3 files to reflect your data storage directory.

@@ -28,6 +28,27 @@ class StartQT5(QtWidgets.QMainWindow):
         self.logfile.write(text)
 
         # self.logfile = close()
+
+    def closeEvent(self, event):
+        reply = QtWidgets.QMessageBox.question(
+            self,
+            "Confirm Exit",
+            "Are you sure you want to exit?",
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No,
+            QtWidgets.QMessageBox.No
+        )
+
+        if reply == QtWidgets.QMessageBox.Yes:
+            # Optional: perform cleanup
+            try:
+                print("Shutting down the DAQ due to GUI exit")
+                self.ui.tab_daq_control_inst.stop_DAQ()
+            except Exception as e:
+                print(f"Failed to shutdown DAQ cleanly: {e}")
+            event.accept() # important: allows the window to actually close
+        else:
+            event.ignore()
+
 #
 class EmittingStream(QObject):
     textWritten = pyqtSignal(str)

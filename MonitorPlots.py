@@ -9,7 +9,6 @@ class MonitorPlots(QtCore.QObject):
     def __init__(self, status):
         super().__init__()
         pg.setConfigOptions(antialias=True)        
-
         self.layoutWidget = pg.GraphicsLayoutWidget()
         self.layoutWidget.setBackground('w')
 
@@ -112,3 +111,4 @@ class MonitorPlots(QtCore.QObject):
     def monitor_callback(self):
         if self.is_monitoring:
             self.request_monitor_data.emit()
+

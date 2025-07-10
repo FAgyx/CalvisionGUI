@@ -1,6 +1,7 @@
 import subprocess
 import sys
 import os
+import signal
 
 
 # Helper class for calling processes and communicating data between them
@@ -22,6 +23,8 @@ class CallProcess:
                                          shell = True,
                                          text = True)
 
+            self.pid = self.proc.pid  # Store the PID
+
             # Readout lines from os file handle. Print them by newline like usual
             self.print_lines_from_fd(self.proc.stdout.fileno(), handle=True )
             self.print_lines_from_fd(self.proc.stderr.fileno(), handle=False)
@@ -42,6 +45,15 @@ class CallProcess:
     def running(self):
         if self.proc == None: return False
         return self.proc.poll() == None
+
+    def terminate_gracefully(self):
+        if self.running():
+            try:
+                os.kill(self.proc.pid, signal.SIGTERM)
+                print(f"Sent SIGTERM to process {self.proc.pid}")
+            except Exception as e:
+                print(f"Failed to send SIGTERM: {e}")
+
 
     def message(self, text):
         # Check if proc is running

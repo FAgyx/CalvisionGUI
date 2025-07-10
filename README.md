@@ -43,3 +43,13 @@ CalvisionGUI/tab_digitizer_config.py line 160: self.importPath_textbox.setText("
 
 ## Running
 Entry file: MainWindow_WaveDump_init.py
+
+## Stopping
+If the GUI hangs, the CalvisionDAQ should still be running. You can stop the DAQ by sending a SIGTERM through the terminal. Find the pid first by:
+```bash
+ps aux | grep dual_readout
+```
+then:
+```bash
+kill -SIGTERM [pid]
+```

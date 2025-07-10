@@ -24,6 +24,7 @@ class tab_DAQ_control(QtCore.QObject):
         super().__init__()
         self.run_config = run_config
         self.status = status
+        self.worker_startDAQ = None
         self.setup_UI(MainWindow)
 
     def setup_UI(self, MainWindow):
@@ -37,12 +38,12 @@ class tab_DAQ_control(QtCore.QObject):
         channelLayout = QtWidgets.QHBoxLayout(channelWindow)
         self.sectionLayout.addWidget(channelWindow)
 
-        self.pushButton_single_plot = QtWidgets.QPushButton()
-        self.pushButton_single_plot.setText("Single plot")
-        self.pushButton_single_plot.clicked.connect(self.single_plot)
-        self.pushButton_single_plot.setEnabled(False)
-        self.pushButton_single_plot.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
-        channelLayout.addWidget(self.pushButton_single_plot)
+        # self.pushButton_single_plot = QtWidgets.QPushButton()
+        # self.pushButton_single_plot.setText("Single plot")
+        # self.pushButton_single_plot.clicked.connect(self.single_plot)
+        # self.pushButton_single_plot.setEnabled(False)
+        # self.pushButton_single_plot.setSizePolicy(QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Maximum)
+        # channelLayout.addWidget(self.pushButton_single_plot)
 
         self.pushButton_check_all = QtWidgets.QPushButton()
         self.pushButton_check_all.setText("Check all")
@@ -136,31 +137,36 @@ class tab_DAQ_control(QtCore.QObject):
         self.sectionLayout.addWidget(self.monitor_plots.get_layout_widget())
 
     def start_DAQ(self):
-        # Step 2: Create a QThread object
-        self.pushButton_single_plot.setEnabled(True)
+        try:
+            # Step 2: Create a QThread object
+            # self.pushButton_single_plot.setEnabled(True)
 
-        self.thread_startDAQ = QThread()
-        # Step 3: Create a worker_startDAQ object
-        self.worker_startDAQ = Worker_startDAQ(self.run_config)
+            self.thread_startDAQ = QThread()
+            # Step 3: Create a worker_startDAQ object
+            self.worker_startDAQ = Worker_startDAQ(self.run_config)
 
-        # Step 4: Move worker_startDAQ to the thread
-        self.worker_startDAQ.moveToThread(self.thread_startDAQ)
 
-        # Step 5: Connect signals and slots
-        self.thread_startDAQ.started.connect(self.worker_startDAQ.run)
-        self.worker_startDAQ.finished.connect(self.thread_startDAQ.quit)
-        self.worker_startDAQ.finished.connect(self.worker_startDAQ.deleteLater)
-        
-        # Step 6: Start the thread
-        self.thread_startDAQ.start()
-        
-        self.thread_startDAQ.finished.connect(self.DAQ_stopped)
+            # Step 4: Move worker_startDAQ to the thread
+            self.worker_startDAQ.moveToThread(self.thread_startDAQ)
+
+            # Step 5: Connect signals and slots
+            self.thread_startDAQ.started.connect(self.worker_startDAQ.run)
+            self.worker_startDAQ.finished.connect(self.thread_startDAQ.quit)
+            self.worker_startDAQ.finished.connect(self.worker_startDAQ.deleteLater)
+            
+            # Step 6: Start the thread
+            self.thread_startDAQ.start()
+            
+            self.thread_startDAQ.finished.connect(self.DAQ_stopped)
+        except Exception as e:
+            print("Failed to start a new thread: {}".format(e))
 
     def stop_DAQ(self):
-        self.worker_startDAQ.stop()
+        if self.worker_startDAQ and self.worker_startDAQ.running():
+            self.worker_startDAQ.stop()
 
     def DAQ_stopped(self):
-        self.pushButton_single_plot.setEnabled(False)
+        # self.pushButton_single_plot.setEnabled(False)
         print("Emitting DAQ readout stopped")
         self.daq_readout_stopped.emit()
 

@@ -9,6 +9,7 @@ class Worker_startDAQ(QObject,CallProcess):
     def __init__(self, run_config):
         super(Worker_startDAQ, self).__init__()
         self.run_config = run_config
+        self.pending_plot = False
 
     def run(self):
         run_name = self.run_config.run_name()
@@ -25,18 +26,39 @@ class Worker_startDAQ(QObject,CallProcess):
         print(line)
 
     def stop(self):
-        self.message("stop\n")
+        if self.running():
+            self.message("stop\n")
+        for _ in range(20):
+            QThread.msleep(100)
+            if not self.running():
+                return
+
+        print("Graceful stop failed, sending SIGTERM...")
+        self.terminate_gracefully()
 
     def single_plot(self):
-        self.message("sample plot\n")
+        if self.pending_plot == False:            
+            self.message("sample plot\n")
+            self.pending_plot = True  # Set the flag
+        hg_times = None
+        hg_channels = None
+        try:
+            # Briefly wait for the files to be created and filled (sleep ~500ms)
+            QThread.currentThread().msleep(500)
+            hg_times, hg_channels = self.read_dump_file(self.run_config.hg_dump_file())
+            # Optionally check if the data is valid before plotting
+            if hg_times is not None and hg_channels is not None:
+                # update plot logic here
+                pass
+        except Exception as e:
+            print(f"[single_plot error]: {e}")
+        finally:
+            self.pending_plot = False  # Always release the flag
+            # print("pending_plot released")
 
-        # Briefly wait for the files to be created and filled (sleep ~100ms)
-        QThread.currentThread().msleep(100)
-
-        hg_times, hg_channels = self.read_dump_file(self.run_config.hg_dump_file())
-        # lg_times, lg_channels = self.read_dump_file(self.run_config.lg_dump_file())
 
         return (hg_times, hg_channels)
+
         # return (hg_times, hg_channels, lg_times, lg_channels)
 
     def read_dump_file(self, path):
@@ -62,7 +84,7 @@ class Worker_startDAQ(QObject,CallProcess):
                 return (times, channels)
 
         except Exception as e:
-            print(f"Error reading dump file: {e}")
+            # print(f"Error reading dump file: {e}")
             return (None, None)
 
 class Reset_DAQ(CallProcess):

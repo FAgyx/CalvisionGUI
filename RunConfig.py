@@ -37,6 +37,23 @@ class RunConfig:
         self.humidity = None
         self.datetime = None
 
+    @staticmethod
+    def extract_run_number(name):
+        """
+        Extracts leading digits after 'run_' from a directory or file name.
+        Returns an integer or None if invalid.
+        """
+        if not name.startswith("run_"):
+            return None
+        number_part = name[4:]
+        digits = ""
+        for char in number_part:
+            if char.isdigit():
+                digits += char
+            else:
+                break
+        return int(digits) if digits else None
+
 
     # def new_config():
     #     run_numbers = [int(name[4:]) for name in os.listdir(staging_area) if name.startswith("run_")]
@@ -50,10 +67,16 @@ class RunConfig:
     #     return config
  
     def make_next_run(self):
-        run_numbers = [int(name[4:]) for name in os.listdir(staging_area) if name.startswith("run_")]
-        self.run_number = max(run_numbers) + 1 if len(run_numbers) > 0 else 0
+        run_numbers = []
+        for name in os.listdir(staging_area):
+            run_num = RunConfig.extract_run_number(name)
+            if run_num is not None:
+                run_numbers.append(run_num)
+
+        self.run_number = max(run_numbers) + 1 if run_numbers else 0
         self.datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         self.save()
+
 
 
     def to_dict(self):
@@ -75,13 +98,27 @@ class RunConfig:
         self.datetime = d.get("Datetime")
 
     def open(run_number):
-        config = RunConfig()
-        config.run_number = run_number
-        path = config.get_path()
-        if not os.path.exists(path):
+        prefix = f"run_{run_number}"
+        match_dir = None
+
+        # Search for a directory or file that starts with run_{run_number}
+        for name in os.listdir(staging_area):
+            if name.startswith(prefix):
+                match_dir = os.path.join(staging_area, name)
+                # print(match_dir)
+                break
+
+        if match_dir is None:
             return None
 
-        with open(path, 'r') as infile:
+        config_path = os.path.join(match_dir, "config.json")
+        if not os.path.exists(config_path):
+            return None
+
+        config = RunConfig()
+        config.run_number = run_number
+
+        with open(config_path, 'r') as infile:
             data = json.load(infile)
             config.from_dict(data)
 
@@ -96,17 +133,30 @@ class RunConfig:
             out.write(json.dumps(self.to_dict(), indent=4))
             print(path+' is written')
 
+    @staticmethod
     def find_all():
-        run_numbers = [int(name[4:]) for name in os.listdir(staging_area) if name.startswith("run_")]
+        run_numbers = []
+        for name in os.listdir(staging_area):
+            run_num = RunConfig.extract_run_number(name)
+            if run_num is not None:
+                run_numbers.append(run_num)
+
         configs = []
-        for i in sorted(run_numbers,reverse=True):
+        for i in sorted(run_numbers, reverse=True):
             c = RunConfig.open(i)
-            if c != None:
+            if c is not None:
                 configs.append(c)
         return configs
 
+
+
     def run_name(self):
-        return "run_{}".format(self.run_number)
+        prefix = f"run_{self.run_number}"
+        for name in os.listdir(staging_area):
+            if name.startswith(prefix):
+                return name  # Return the actual folder name with suffix
+        return prefix  # Fallback to default format if no match found
+
     
     def get_path(self):
         return self.run_directory() + "/config.json"

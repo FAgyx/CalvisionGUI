@@ -45,7 +45,7 @@ CalvisionGUI/tab_digitizer_config.py line 160: self.importPath_textbox.setText("
 Entry file: MainWindow_WaveDump_init.py
 
 ## Stopping
-If the GUI hangs, the CalvisionDAQ should still be running. You can stop the DAQ by sending a SIGTERM through the terminal. Find the pid first by:
+If the GUI hangs, the CalvisionDAQ should still be running. Don't close the GUI as it may send a SIGKILL to DAQ which may corrupt the output root file. You can stop the DAQ by sending a SIGTERM through the terminal. Find the pid first by:
 ```bash
 ps aux | grep dual_readout
 ```
@@ -53,3 +53,4 @@ then:
 ```bash
 kill -SIGTERM [pid]
 ```
+Then you can manually exit the GUI. Note: When closing the GUI, a SIGTERM will be sent to DAQ if the subprocess is still running. This works when the GUI is not hanging and the data will not be corrupted. But this is not verified when the GUI hangs.

@@ -12,22 +12,27 @@ class Worker_startDAQ(QObject,CallProcess):
         self.pending_plot = False
 
     def run(self):
-        run_name = self.run_config.run_name()
-        hg_config = self.run_config.hg_config_file()
-        lg_config = self.run_config.lg_config_file()
-        # source_conda = "source /home/uva/miniforge3/etc/profile.d/conda.sh; conda activate calvision;"
-        CallProcess.run(self, "/home/muonuser/local_install/bin/dual_readout {} {} {}".format(run_name, hg_config, lg_config))
-
-        print("Process closed!")
-
-        self.finished.emit()
+        try:
+            run_name = self.run_config.run_name()
+            hg_config = self.run_config.hg_config_file()
+            lg_config = self.run_config.lg_config_file()
+            # source_conda = "source /home/uva/miniforge3/etc/profile.d/conda.sh; conda activate calvision;"
+            success = CallProcess.run(self, "/home/muonuser/local_install/bin/dual_readout {} {} {}".format(run_name, hg_config, lg_config))
+            print("Process closed!" if success else "Process closed with error!")
+        except Exception as e:
+            print(f"[run error] {e}")
+        finally:
+            self.finished.emit()  #emit finished no matter what
 
     def handle_output(self, line):
         print(line)
 
     def stop(self):
         if self.running():
-            self.message("stop\n")
+            try:
+                self.message("stop\n")
+            except BrokenPipeError:
+                print("BrokenPipe when sending 'stop'")
         for _ in range(20):
             QThread.msleep(100)
             if not self.running():

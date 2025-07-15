@@ -51,9 +51,29 @@ class CallProcess:
             try:
                 os.kill(self.proc.pid, signal.SIGTERM)
                 print(f"Sent SIGTERM to process {self.proc.pid}")
-            except Exception as e:
-                print(f"Failed to send SIGTERM: {e}")
 
+                # Wait for process to terminate
+                self.proc.wait(timeout=5)
+                print("Process terminated gracefully")
+
+            except subprocess.TimeoutExpired:
+                print("SIGTERM timed out, escalating to SIGKILL...")
+                self.terminate_forcefully()
+            except Exception as e:
+                print(f"SIGTERM failed: {e}")
+
+        self.proc = None  # Release reference
+
+    def terminate_forcefully(self):
+        if self.running():
+            try:
+                os.kill(self.proc.pid, signal.SIGKILL)
+                print(f"Sent SIGKILL to process {self.proc.pid}")
+                self.proc.wait(timeout=5)
+                print("Process killed forcefully")
+            except Exception as e:
+                print(f"Failed to forcefully kill process: {e}")
+        self.proc = None
 
     def message(self, text):
         # Check if proc is running
@@ -66,6 +86,7 @@ class CallProcess:
             os.write(self.proc.stdin.fileno(), text.encode('utf-8'))
         except Exception as e:
             print("Failed to send message {} to the process".format(text))
+
 
     def print_lines_from_fd(self, fd, handle=True):
         try:
@@ -99,41 +120,4 @@ class CallProcess:
     # Helper function for how to handle output
     def handle_output(self, line):
         pass
-
-
-# Call Raspberry Pi client with verbose output
-# Generally this won't look at returned data from the Pi
-class ClientVerboseProcess(CallProcess):
-    def __init__(self):
-        self.timeout = 5
-
-    def handle_output(self, line):
-        print(line)
-
-    def run(self, ip_address, port, command):
-        return CallProcess.run(self, "/home/uva/local_install/bin/client {} {} -c '{}'".format(ip_address, port, command))
-
-    def execute(ip_address, port, command):
-        return ClientVerboseProcess().run(ip_address, port, command)
-
-# Call Rasperry Pi client and supress its output. Sets self.result
-# to the returned data from the Pi if available (None otherwise)
-class ClientReadProcess(CallProcess):
-    def __init__(self):
-        self.result = ""
-        self.timeout = 5
-
-    def handle_output(self, line):
-        self.result += line
-
-    def run(self, ip_address, port, command):
-        return CallProcess.run(self, "/home/uva/local_install/bin/client {} {} -b '{}'".format(ip_address, port, command))
-
-    # Static method for quickly calling the process and getting the result
-    def execute(ip_address, port, command):
-        proc = ClientReadProcess()
-        if proc.run(ip_address, port, command):
-            return proc.result
-        else:
-            return None
 

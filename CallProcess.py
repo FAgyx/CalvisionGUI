@@ -53,7 +53,7 @@ class CallProcess:
                 print(f"Sent SIGTERM to process {self.proc.pid}")
 
                 # Wait for process to terminate
-                self.proc.wait(timeout=5)
+                self.proc.wait(timeout=10)
                 print("Process terminated gracefully")
 
             except subprocess.TimeoutExpired:

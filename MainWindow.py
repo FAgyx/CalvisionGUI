@@ -126,7 +126,10 @@ class Ui_MainWindow():
         self.status.update_timer.timeout.connect(self.update_status)
         # self.status.update_timer.timeout.connect(self.tab_pi_control_inst.monitor_plots.monitor_callback)
         # self.status.update_timer.timeout.connect(self.tab_sipm_hv_config_inst.monitor_plots.monitor_callback)
-        self.status.update_timer.timeout.connect(self.tab_daq_control_inst.monitor_plots.monitor_callback)
+        # self.status.update_timer.timeout.connect(self.tab_daq_control_inst.monitor_plots.monitor_callback)
+        # do not connect self.tab_daq_control_inst.monitor_plots.monitor_callback, since MonitorPlots has its own timer conect
+        # self.run_status.update_timer.timeout.connect(self.monitor_callback)
+
 
         self.tab_daq_control_inst.daq_readout_stopped.connect(self.tab_run_control_inst.end_run)
 

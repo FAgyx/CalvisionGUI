@@ -2,6 +2,8 @@ from PyQt5.QtCore import *
 import time
 from CallProcess import *
 import struct
+import traceback
+import os
 
 class Worker_startDAQ(QObject,CallProcess):
     finished = pyqtSignal()
@@ -42,29 +44,37 @@ class Worker_startDAQ(QObject,CallProcess):
         self.terminate_gracefully()
 
     def single_plot(self):
-        if self.pending_plot == False:            
-            self.message("sample plot\n")
-            self.pending_plot = True  # Set the flag
-        hg_times = None
-        hg_channels = None
+        # print("single_plot() called")
+        # traceback.print_stack(file=sys.stdout)
+        if self.pending_plot:
+            return  # Avoid duplicate sending
+  
+        self.pending_plot = True  # Set the flag
         try:
-            # Briefly wait for the files to be created and filled (sleep ~500ms)
             QThread.currentThread().msleep(500)
-            hg_times, hg_channels = self.read_dump_file(self.run_config.hg_dump_file())
-            # Optionally check if the data is valid before plotting
-            if hg_times is not None and hg_channels is not None:
-                # update plot logic here
-                pass
+            self.message("sample plot\n")
+            # print("sample plot sent from GUI")
+            
+
+            # Briefly wait for the files to be created and filled (sleep ~500ms)
+            # QThread.currentThread().msleep(500)
+            dump_path = self.run_config.hg_dump_file()
+            for _ in range(20):  # Wait up to ~2 seconds
+                if os.path.exists(dump_path) and os.path.getsize(dump_path) > 0:
+                    break
+                QThread.currentThread().msleep(100)
+            else: # only runs when break condition not met
+                print(f"[single_plot warning]: dump file not found or empty after timeout: {dump_path}")
+
+
+            hg_times, hg_channels = self.read_dump_file(dump_path)
+            return (hg_times, hg_channels)
         except Exception as e:
             print(f"[single_plot error]: {e}")
-        finally:
+            return (None, None)
+        finally:  #will execute even return is hit in try or except
             self.pending_plot = False  # Always release the flag
-            # print("pending_plot released")
 
-
-        return (hg_times, hg_channels)
-
-        # return (hg_times, hg_channels, lg_times, lg_channels)
 
     def read_dump_file(self, path):
         try:

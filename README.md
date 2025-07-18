@@ -43,6 +43,7 @@ CalvisionGUI/tab_digitizer_config.py line 160: self.importPath_textbox.setText("
 
 ## Running
 Entry file: MainWindow_WaveDump_init.py
+Note: For first time running, make sure in the GUI, tab "Digitizer Configuration", click on the button "Fetch DRS Calib Table". This step reads the calibration table inside the digitizer and saves it in your data storage location. The CalvisionDAQ requires this table to correct the raw data. This only needs to be done once if you are using the same digitizer hardware.
 
 ## Stopping
 If the GUI hangs, the CalvisionDAQ should still be running. Don't close the GUI as it may send a SIGKILL to DAQ which may corrupt the output root file. You can stop the DAQ by sending a SIGTERM through the terminal. Find the pid first by:

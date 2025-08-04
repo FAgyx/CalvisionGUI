@@ -7,6 +7,7 @@ from tab_digitizer_config import tab_digitizer_config
 from tab_run_control import tab_run_control
 from tab_previous_runs import tab_previous_runs
 from tab_rotor_control import tab_rotor_control
+from tab_DAQ_monitor import tab_DAQ_monitor
 # from tab_pulser import tab_pulser
 
 from RunConfig import *
@@ -80,6 +81,14 @@ class Ui_MainWindow():
         self.tabWidget.addTab(run_control_tab, "Run Control")
         self.tab_run_control_inst = tab_run_control(self.run_config, self.status, run_control_tab)
 
+        daq_control_tab = QtWidgets.QWidget()
+        self.tabWidget.addTab(daq_control_tab, "DAQ Control")
+        self.tab_daq_control_inst = tab_DAQ_control(self.run_config, self.status, daq_control_tab)
+
+        daq_monitor_tab = QtWidgets.QWidget()
+        self.tabWidget.addTab(daq_monitor_tab, "DAQ Monitor")
+        self.tab_daq_monitor_inst = tab_DAQ_monitor(self.run_config, self.status, daq_monitor_tab)
+
         previous_runs_tab = QtWidgets.QWidget()
         self.tabWidget.addTab(previous_runs_tab, "Previous Runs")
         self.tab_previous_runs_inst = tab_previous_runs(previous_runs_tab)
@@ -105,9 +114,7 @@ class Ui_MainWindow():
         # self.tabWidget.addTab(pi_control_tab, "PI Control")
         # self.tab_pi_control_inst = tab_PIcontrol(self.run_config, self.status, pi_control_tab)
 
-        daq_control_tab = QtWidgets.QWidget()
-        self.tabWidget.addTab(daq_control_tab, "DAQ Control")
-        self.tab_daq_control_inst = tab_DAQ_control(self.run_config, self.status, daq_control_tab)
+        
 
         # calibrate_tab = QtWidgets.QWidget()
         # self.tabWidget.addTab(calibrate_tab, "Calibrate")
@@ -129,6 +136,8 @@ class Ui_MainWindow():
         # self.status.update_timer.timeout.connect(self.tab_daq_control_inst.monitor_plots.monitor_callback)
         # do not connect self.tab_daq_control_inst.monitor_plots.monitor_callback, since MonitorPlots has its own timer conect
         # self.run_status.update_timer.timeout.connect(self.monitor_callback)
+
+        self.status.update_timer.timeout.connect(self.tab_daq_monitor_inst.single_plot)
 
 
         self.tab_daq_control_inst.daq_readout_stopped.connect(self.tab_run_control_inst.end_run)
@@ -191,6 +200,7 @@ class Ui_MainWindow():
         self.status.begin_run()
         self.tab_run_control_inst.update_status_all()
         self.tab_daq_control_inst.monitor_plots.run_start()
+        self.tab_daq_monitor_inst.run_start()
         # self.tab_pi_control_inst.monitor_plots.run_start()
         # self.tab_sipm_hv_config_inst.monitor_plots.run_start()
         self.save_status(self.run_config.run_directory() + "/run_start_status.json")
@@ -201,6 +211,7 @@ class Ui_MainWindow():
             self.tab_daq_control_inst.stop_DAQ()
             self.status.end_run()
             self.tab_daq_control_inst.monitor_plots.run_stop()
+            self.tab_daq_monitor_inst.run_stop()
             # self.tab_pi_control_inst.monitor_plots.run_stop()
             # self.tab_sipm_hv_config_inst.monitor_plots.run_stop()
             self.save_status(self.run_config.run_directory() + "/run_end_status.json")
